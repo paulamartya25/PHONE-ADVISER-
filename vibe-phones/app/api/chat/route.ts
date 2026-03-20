@@ -6,6 +6,15 @@ export async function POST(req: Request) {
 
   console.log('API called, messages:', messages);
 
+  // Convert v6 UIMessage format to CoreMessage format for streamText
+  const coreMessages = messages.map((m: any) => ({
+    role: m.role,
+    content: m.content ?? m.parts
+      ?.filter((p: any) => p.type === 'text')
+      ?.map((p: any) => p.text)
+      ?.join('') ?? '',
+  }));
+
   const result = streamText({
     model: groq('llama-3.3-70b-versatile'),
     system: `You are 'TechMatch AI', an expert smartphone recommender. 
@@ -18,10 +27,10 @@ export async function POST(req: Request) {
     4. When making a recommendation, clearly list the key specs in a highly readable format (use bullet points and bold text).
     5. When asked to compare two or more phones, provide a clear, side-by-side text comparison of their main specifications and highlight the winner for their specific use case.
     6. Keep your tone helpful, objective, and tech-savvy. Do not use overly flowery language.`,
-    messages,
+    messages: coreMessages,
   });
 
-   console.log('Stream created:', result);
+  console.log('Stream created:', result);
 
   return result.toUIMessageStreamResponse();
 }
