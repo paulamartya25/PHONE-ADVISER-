@@ -4,7 +4,9 @@ import { streamText } from 'ai';
 export async function POST(req: Request) {
   const { messages } = await req.json();
 
-  const result = await streamText({
+  console.log('API called, messages:', messages);
+
+  const result = streamText({
     model: groq('llama-3.3-70b-versatile'),
     system: `You are 'TechMatch AI', an expert smartphone recommender. 
     Your goal is to help users find the perfect smartphone based on their specific needs.
@@ -19,5 +21,7 @@ export async function POST(req: Request) {
     messages,
   });
 
-  return result.toTextStreamResponse();
+   console.log('Stream created:', result);
+
+  return result.toUIMessageStreamResponse();
 }
